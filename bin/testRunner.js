@@ -33,18 +33,12 @@ function testRunner()
 	//currently in progress?
 	this.running = false;
 	this.suites = [];
-	this.cancel = function()
-	{
-		if(self.test_runner_process)
-			self.test_runner_process.kill();		
-	}
 	this.start = function(options)
 	{
 		//create the child process
-		var test_runner_process = child_process.fork(__dirname +"/lrs-test.js",["--debug"],{execArgv:[/*"--debug-brk=5959"*/],cwd:__dirname+"/../"});
+		var test_runner_process = child_process.fork(__dirname +"/lrs-test.js",[],{cwd:__dirname+"/../"});
 		this.running = true;
 		self.test_runner_process = test_runner_process;
-		
 		//hook up the messaging
 		test_runner_process.postMessage = function(action, payload)
 		{
@@ -65,44 +59,27 @@ function testRunner()
 			{
 				self.messages.push(new runnerOutputMessage("test pass", message.payload))
 				var tests = self.suites[self.suites.length - 1].tests;
-				
-				var test;
-				for(var i = 0; i < tests.length; i++)
-				{
-					if(tests[i].title == message.payload)
-					{
-						test = tests[i];
-					}
-				}
+				var test = tests[tests.length-1];
 				if(test)
 				{
 					test.pass = true;
-					test.message = message.payload;
+					tests[tests.length-1].message = message.payload;
 				}
 			}
 			if (message.action == "test fail")
 			{
 				self.messages.push(new runnerOutputMessage("test fail", message.payload))
 				var tests = self.suites[self.suites.length - 1].tests;
-				
-				var test;
-				for(var i = 0; i < tests.length; i++)
-				{
-					if(tests[i].title == message.payload.title)
-					{
-						test = tests[i];
-					}
-				}
-
+				var test = tests[tests.length-1];
 				if(test)
 				{
 					test.pass = false;
-					test.message = message.payload.message;
+					tests[tests.length-1].message = message.payload;
 				}
 			}
 			if (message.action == "ready")
 			{
-				test_runner_process.postMessage("runTests", options);	
+				test_runner_process.postMessage("runTests", options);
 			}
 			if (message.action == "suite")
 			{
@@ -122,7 +99,6 @@ function testRunner()
 		test_runner_process.on('close', function()
 		{
 			self.running = false;
-			self.emit('close');
 		})
 	}
 }

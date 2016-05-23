@@ -1,5 +1,5 @@
 var program = require('commander');
-var testRunner = new(require(__dirname + '/testRunner.js').testRunner)();
+var testRunner = new (require(__dirname +'/testRunner.js').testRunner)();
 var jsonSchema = require('jsonschema');
 var validate = jsonSchema.validate;
 
@@ -31,7 +31,7 @@ var options = {
         auth_token_path: program.auth_token_path,
         authorization_path: program.authorization_path
     }
-   
+
     /*
 
 var valid = validate(options, {
@@ -52,34 +52,35 @@ var valid = validate(options, {
 })
 
 
-if (valid.errors.length) {
-    program.help();
-}*/
 
-testRunner.on("statusMessage", function(message) {
-    if (message.action == 'log')
-        console.log(colors.white.bold(message.action) + ": " + message.payload);
-    if (message.action == 'test fail')
-    {
-        console.log(colors.red.bold(message.action) + ": " + message.payload.title);
-        console.log(colors.red.bold(message.payload.message));
-    }
-    if (message.action == 'test pass')
-        console.log(colors.green.bold(message.action) + ": " + message.payload);
-    if (message.action == 'suite')
-        console.log("\n" + colors.white.bold(message.action) + ": ", colors.white.bold(message.payload) + "\n");
+if(valid.errors.length)
+{
+	program.help();
+}
+
+testRunner.on("statusMessage",function(message)
+{
+	if(message.action == 'log')
+		console.log(colors.white.bold(message.action) + ": " + message.payload);
+	if(message.action == 'test fail')
+		console.log(colors.red.bold(message.action) + ": " + message.payload);
+	if(message.action == 'test pass')
+		console.log(colors.green.bold(message.action) + ": " + message.payload);
+	if(message.action == 'suite')
+		console.log("\n" + colors.white.bold(message.action) + ": " , colors.white.bold(message.payload) + "\n");
 });
 
 
 //catches ctrl+c event
-process.on('SIGINT', function() {
-    console.log(colors.white('Closeing'));
-    process.exit();
+process.on('SIGINT',function()
+{
+	console.log(colors.white('Closeing'));
 });
 
 
-process.on('exit', function() {
-    console.log(colors.white('Closed'));
+process.on('exit',function()
+{
+	console.log(colors.white('Closed'));
 })
 
 
@@ -88,7 +89,7 @@ if (!program.oAuth1)
     testRunner.start(options);
 else {
 
-    
+
     var config = {};
     config.consumer_key = options.consumer_key;
     config.consumer_secret = options.consumer_secret;
@@ -120,7 +121,7 @@ else {
             token_secret: options.token_secret,
             verifier: options.verifier
         }
-        
+
         testRunner.start(options);
     });
 }

@@ -4,50 +4,58 @@
  * Description : This is the command line interface for running the lrs conformance test suite.
  *
  */
-(function(process, require, program, exit, packageJson, Q, Joi, fs, path, Mocha) {
+(function(process, require, program, exit, packageJson, Q, Joi, fs, path, Mocha)
+{
     'use strict';
 
-    function processMessageReporter(p) {
-        return function(runner) {
-            runner.on('test', function(test) {
+    function processMessageReporter(p)
+    {
+        return function(runner)
+        {
+            runner.on('test', function(test)
+            {
                 p.postMessage("test start", test.title);
             })
-            runner.on('test end', function(test) {
+            runner.on('test end', function(test)
+            {
                 p.postMessage("test end", test.title);
             })
-            runner.on('pass', function(test) {
+            runner.on('pass', function(test)
+            {
                 p.postMessage("test pass", test.title);
             })
-            runner.on('fail', function(test, err) {
-                p.postMessage("test fail", {title:test.title,message:err.toString()});
+            runner.on('fail', function(test, err)
+            {
+                p.postMessage("test fail",  err.toString());
             })
-            runner.on('end', function() {
+            runner.on('end', function()
+            {
                 p.postMessage("end", 'All done');
             });
-            runner.on('pending', function(test) {
+            runner.on('pending', function(test)
+            {
                 p.postMessage("pending", test.title);
             });
-            runner.on('start', function() {
+            runner.on('start', function()
+            {
                 p.postMessage("log", 'Starting tests');
             });
-            runner.on('suite', function(suite) {
+            runner.on('suite', function(suite)
+            {
                 p.postMessage("suite", suite.title);
             });
         }
     }
-
-    function runTests(_options) {
-        var optionsValidator = Joi.object({
+    function runTests(_options)
+    {
+        var optionsValidator = Joi.object(
+        {
             directory: Joi.string(),
             /* See [RFC-3986](http://tools.ietf.org/html/rfc3986#page-17) */
             endpoint: Joi.string().regex(/^[a-zA-Z][a-zA-Z0-9+\.-]*:.+/, 'URI').required(),
             basicAuth: Joi.any(true, false),
-            oAuth1: Joi.any(true, false),
-            authUser: Joi.string().when('basicAuth', {
-                is: 'true',
-                then: Joi.required()
-            }),
-            authPass: Joi.string().when('basicAuth', {
+            authUser: Joi.string().when('basicAuth',
+            {
                 is: 'true',
                 then: Joi.required()
             }),
@@ -76,7 +84,8 @@
         }).unknown(false);
 
         var validOptions = Joi.validate(_options, optionsValidator);
-        if (validOptions.error) {
+        if (validOptions.error)
+        {
             process.postMessage("log", "Options not valid " + validOptions.error);
             process.exit();
         }
@@ -97,8 +106,9 @@
             verifier: _options.verifier,
             oAuth1: _options.oAuth1
         };
-        
-        var mocha = new Mocha({
+
+        var mocha = new Mocha(
+        {
             uii: 'bdd',
             reporter: processMessageReporter(process),
             timeout: '15000',
@@ -110,7 +120,7 @@
         process.env.BASIC_AUTH_USER = options.authUser;
         process.env.BASIC_AUTH_PASSWORD = options.authPass;
         process.env.OAUTH1_ENABLED = options.oAuth1;
-        
+
 
         if(options.oAuth1)
         {
@@ -128,33 +138,45 @@
 
         process.postMessage("log", (JSON.stringify(global.OAUTH)));
         var testDirectory = __dirname + '/../test/' + options.directory;
-        fs.readdirSync(testDirectory).filter(function(file) {
+        fs.readdirSync(testDirectory).filter(function(file)
+        {
             return file.substr(-3) === '.js';
-        }).forEach(function(file) {
+        }).forEach(function(file)
+        {
             mocha.addFile(
                 path.join(testDirectory, file)
             );
         });
-        mocha.run(function(failures) {
-            if (failures) {} else {}
+        mocha.run(function(failures)
+            {
+                if (failures)
+                {}
+                else
+                {}
 
-            process.postMessage("log", "Test Suite Complete");
-            process.exit();
-        })
+                process.postMessage("log", "Test Suite Complete");
+                process.exit();
+            })
     }
 
-    function hookupIPC() {
-        process.postMessage = function(action, payload) {
-            process.send({
+    function hookupIPC()
+    {
+        process.postMessage = function(action, payload)
+        {
+            process.send(
+            {
                 action: action,
                 payload: payload
             })
         }
-        process.on('message', function(message) {
-            if (message.action == "ping") {
+        process.on('message', function(message)
+        {
+            if (message.action == "ping")
+            {
                 process.postMessage("log", "pong");
             }
-            if (message.action == "runTests") {
+            if (message.action == "runTests")
+            {
                 process.postMessage("log", "runTests starting");
                 runTests(message.payload);
             }
