@@ -1089,57 +1089,57 @@
         });
     });
 
-    describe('A Voided Statement is defined as a Statement that is not a Voiding Statement and is the Target of a Voiding Statement within the LRS (4.2.c)', function () {
-        var voidedId = helper.generateUUID();
-
-        before('persist voided statement', function (done) {
-            var templates = [
-                {statement: '{{statements.default}}'}
-            ];
-            var voided = createFromTemplate(templates);
-            voided = voided.statement;
-            voided.id = voidedId;
-
-            request(helper.getEndpointAndAuth())
-                .post(helper.getEndpointStatements())
-                .headers(helper.addAllHeaders({}))
-                .json(voided)
-                .expect(200, done);
-        });
-
-        before('persist voiding statement', function (done) {
-            var templates = [
-                {statement: '{{statements.object_statementref}}'},
-                {verb: '{{verbs.voided}}'}
-            ];
-            var voiding = createFromTemplate(templates);
-            voiding = voiding.statement;
-            voiding.object.id = voidedId;
-
-            request(helper.getEndpointAndAuth())
-                .post(helper.getEndpointStatements())
-                .headers(helper.addAllHeaders({}))
-                .json(voiding)
-                .expect(200, done);
-        });
-
-        it('should return a voided statement when using GET "voidedStatementId"', function (done) {
-            var query = helper.getUrlEncoding({voidedStatementId: voidedId});
-            request(helper.getEndpointAndAuth())
-                .get(helper.getEndpointStatements() + '?' + query)
-                .headers(helper.addAllHeaders({}))
-                .expect(200)
-                .end(function (err, res) {
-                    if (err) {
-                        done(err);
-                    } else {
-                        var statement = parse(res.body, done);
-                        expect(statement.id).to.equal(voidedId);
-                        done();
-                    }
-                });
-        });
-    });
+    // describe('A Voided Statement is defined as a Statement that is not a Voiding Statement and is the Target of a Voiding Statement within the LRS (4.2.c)', function () {
+    //     var voidedId = helper.generateUUID();
+    //
+    //     before('persist voided statement', function (done) {
+    //         var templates = [
+    //             {statement: '{{statements.default}}'}
+    //         ];
+    //         var voided = createFromTemplate(templates);
+    //         voided = voided.statement;
+    //         voided.id = voidedId;
+    //
+    //         request(helper.getEndpointAndAuth())
+    //             .post(helper.getEndpointStatements())
+    //             .headers(helper.addAllHeaders({}))
+    //             .json(voided)
+    //             .expect(200, done);
+    //     });
+    //
+    //     before('persist voiding statement', function (done) {
+    //         var templates = [
+    //             {statement: '{{statements.object_statementref}}'},
+    //             {verb: '{{verbs.voided}}'}
+    //         ];
+    //         var voiding = createFromTemplate(templates);
+    //         voiding = voiding.statement;
+    //         voiding.object.id = voidedId;
+    //
+    //         request(helper.getEndpointAndAuth())
+    //             .post(helper.getEndpointStatements())
+    //             .headers(helper.addAllHeaders({}))
+    //             .json(voiding)
+    //             .expect(200, done);
+    //     });
+    //
+    //     it('should return a voided statement when using GET "voidedStatementId"', function (done) {
+    //         var query = helper.getUrlEncoding({voidedStatementId: voidedId});
+    //         request(helper.getEndpointAndAuth())
+    //             .get(helper.getEndpointStatements() + '?' + query)
+    //             .headers(helper.addAllHeaders({}))
+    //             .expect(200)
+    //             .end(function (err, res) {
+    //                 if (err) {
+    //                     done(err);
+    //                 } else {
+    //                     var statement = parse(res.body, done);
+    //                     expect(statement.id).to.equal(voidedId);
+    //                     done();
+    //                 }
+    //             });
+    //     });
+    // });
 
     describe('An LRS\'s Statement API, upon processing a successful GET request, can only return a Voided Statement if that Statement is specified in the voidedStatementId parameter of that request (7.2.4.a)', function () {
         var voidedId = helper.generateUUID();
@@ -3450,65 +3450,209 @@
         });
 
         it('A Group uses the "member" property at most one time (Multiplicity, 4.1.a)', function (done) {
-            // JSON parser validates this
-            done();
+            var data = "{\"actor\":{\"objectType\":\"Group\", \"name\":\"Groupity\", \"mbox\":\"mailto:groupity@mail.com\", \"member\":[{\"mbox\":\"mailto:farce@mail.com\"}, {\"mbox\":\"mailto:mbox@mail.com\", \"name\":\"Johnny\"}], \"member\":[{\"mbox\":\"mailto:farce@mail.com\"}, {\"mbox\":\"mailto:harvey@mail.com\", \"name\":\"Harvey\"}]}, \"verb\":{\"id\":\"http://test.com/test\"}, \"object\":{\"id\":\"http://test.com/Iobject\"}}";
+
+            request(helper.getEndpoint())
+                .post(helper.getEndpointStatements())
+                .headers(helper.addAllHeaders({}))
+                .body(data)
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        done();
+                    }
+                });
         });
 
         it('An "actor" property uses the "objectType" property at most one time (Multiplicity, 4.1.a)', function (done) {
-            // JSON parser validates this
-            done();
+            var data = "{\"actor\":{\"objectType\":\"Agent\", \"objectType\":\"Group\", \"name\":\"Groupity\", \"mbox\":\"mailto:groupity@mail.com\", \"member\":[{\"mbox\":\"mailto:farce@mail.com\"}, {\"mbox\":\"mailto:mbox@mail.com\", \"name\":\"Johnny\"}]}, \"verb\":{\"id\":\"http://test.com/test\"}, \"object\":{\"id\":\"http://test.com/Iobject\"}}";
+
+            request(helper.getEndpoint())
+                .post(helper.getEndpointStatements())
+                .headers(helper.addAllHeaders({}))
+                .body(data)
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        done();
+                    }
+                });
         });
 
         it('An Agent uses the "mbox_sha1sum" property at most one time (Multiplicity, 4.1.a)', function (done) {
-            // JSON parser validates this
-            done();
+            var data = "{\"actor\":{\"objectType\":\"Agent\", \"name\":\"Groupity\", \"mbox_sha1sum\":\"ebd31e95054c018b10727ccffd2ef2ec3a016ee9\"}}, \"verb\":{\"id\":\"http://test.com/test\"}, \"object\":{\"id\":\"http://test.com/Iobject\"}}";
+
+            request(helper.getEndpoint())
+                .post(helper.getEndpointStatements())
+                .headers(helper.addAllHeaders({}))
+                .body(data)
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        done();
+                    }
+                });
         });
 
         it('An Agent uses the "openid" property at most one time (Multiplicity, 4.1.a)', function (done) {
-            // JSON parser validates this
-            done();
+            var data = "{\"actor\":{\"objectType\":\"Agent\", \"name\":\"Soupity\", \"openid\":\"http://rex.openid.example.org/\"}}, \"verb\":{\"id\":\"http://test.com/test\"}, \"object\":{\"id\":\"http://test.com/Iobject\"}}";
+
+            request(helper.getEndpoint())
+                .post(helper.getEndpointStatements())
+                .headers(helper.addAllHeaders({}))
+                .body(data)
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        done();
+                    }
+                });
         });
 
         it('An Agent uses the "account" property at most one time (Multiplicity, 4.1.a)', function (done) {
-            // JSON parser validates this
-            done();
+            var data = "{\"actor\":{\"objectType\":\"Agent\", \"name\":\"Soupity\", \"account\":{\"homePage\":\"http://www.example.com\", \"name\": \"13936749\"}}}, \"verb\":{\"id\":\"http://test.com/test\"}, \"object\":{\"id\":\"http://test.com/Iobject\"}}";
+
+            request(helper.getEndpoint())
+                .post(helper.getEndpointStatements())
+                .headers(helper.addAllHeaders({}))
+                .body(data)
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        done();
+                    }
+                });
         });
 
         it('An Agent uses the "name" property at most one time (Multiplicity, 4.1.a)', function (done) {
-            // JSON parser validates this
-            done();
+            var data = "{\"actor\":{\"objectType\":\"Agent\", \"name\":\"Persephone\", \"name\":\"Grover\", \"mbox\":\"mailto:anybody@mail.com\"}}, \"verb\":{\"id\":\"http://test.com/test\"}, \"object\":{\"id\":\"http://test.com/Iobject\"}}";
+
+            request(helper.getEndpoint())
+                .post(helper.getEndpointStatements())
+                .headers(helper.addAllHeaders({}))
+                .body(data)
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        done();
+                    }
+                });
         });
 
         it('An Agent uses the "mbox" property at most one time (Multiplicity, 4.1.a)', function (done) {
-            // JSON parser validates this
-            done();
+            var data = "{\"actor\":{\"objectType\":\"Agent\", \"name\":\"Oscar\", \"mbox\":\"mailto:anybody@mail.com\", \"mbox\":\"mailto:alastair@mail.com\"}}, \"verb\":{\"id\":\"http://test.com/test\"}, \"object\":{\"id\":\"http://test.com/Iobject\"}}";
+
+            request(helper.getEndpoint())
+                .post(helper.getEndpointStatements())
+                .headers(helper.addAllHeaders({}))
+                .body(data)
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        done();
+                    }
+                });
         });
 
         it('An Anonymous Group uses the "member" property at most one time (Multiplicity, 4.1.a)', function (done) {
-            // JSON parser validates this
-            done();
+            var data = "{\"actor\":{\"objectType\":\"Group\", \"name\":\"Anonymous\", \"member\":[\"mbox\":\"mailto:everybody@mail.com\", \"mbox\":\"mailto:alastair@mail.com\", \"mbox\":\"mailto:zinnia@flower.com\"], \"member\":[\"mbox\":\"mailto:moses@mail.com\", \"mbox\":\"mailto:aaron@mail.com\"]}}, \"verb\":{\"id\":\"http://test.com/test\"}, \"object\":{\"id\":\"http://test.com/Iobject\"}}";
+
+            request(helper.getEndpoint())
+                .post(helper.getEndpointStatements())
+                .headers(helper.addAllHeaders({}))
+                .body(data)
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        done();
+                    }
+                });
         });
 
         it('An Identified Group uses the "mbox" property at most one time (Multiplicity, 4.1.a)', function (done) {
-            // JSON parser validates this
-            done();
+            var data = "{\"actor\":{\"objectType\":\"Group\", \"name\":\"Nonymous\", \"mbox\":\"mailto:nonymous@mail.com\", \"mbox\":\"mailto:georgia@mail.com\", \"member\":[\"mbox\":\"mailto:everybody@mail.com\", \"mbox\":\"mailto:alastair@mail.com\", \"mbox\":\"mailto:zinnia@flower.com\"]}}, \"verb\":{\"id\":\"http://test.com/test\"}, \"object\":{\"id\":\"http://test.com/Iobject\"}}";
+
+            request(helper.getEndpoint())
+                .post(helper.getEndpointStatements())
+                .headers(helper.addAllHeaders({}))
+                .body(data)
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        done();
+                    }
+                });
         });
 
         it('An Identified Group uses the "mbox_sha1sum" property at most one time (Multiplicity, 4.1.a)', function (done) {
-            // JSON parser validates this
-            done();
-        });
+            var data = "{\"actor\":{\"objectType\":\"Group\", \"name\":\"Nonymous\", \"mbox_sha1sum\":\"ebd31e9502ef2ec354c018b10727ccffda016ee9\", \"mbox_sha1sum\":\"abcdef1234567890fedcba0987654321f7f7f7f7\"}}, \"verb\":{\"id\":\"http://test.com/test\"}, \"object\":{\"id\":\"http://test.com/Iobject\"}}";
 
+            request(helper.getEndpoint())
+                .post(helper.getEndpointStatements())
+                .headers(helper.addAllHeaders({}))
+                .body(data)
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        done();
+                    }
+                });
+        });
+/* Note this is duplicated two tests below */
         it('An Identified Group uses the "openid" property at most one time (Multiplicity, 4.1.a)', function (done) {
-            // JSON parser validates this
-            done();
+            var data = "{\"actor\":{\"objectType\":\"Group\", \"name\":\"Hancock\", \"openid\":\"http://toby.openid.example.org/\", \"openid\":\"http://richard.openid.example.org/\"}}, \"verb\":{\"id\":\"http://test.com/test\"}, \"object\":{\"id\":\"http://test.com/Iobject\"}}";
+
+            request(helper.getEndpoint())
+                .post(helper.getEndpointStatements())
+                .headers(helper.addAllHeaders({}))
+                .body(data)
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        done();
+                    }
+                });
         });
 
         it('An Identified Group uses the "account" property at most one time (Multiplicity, 4.1.a)', function (done) {
-            // JSON parser validates this
-            done();
-        });
+            var data = "{\"actor\":{\"objectType\":\"Group\", \"name\":\"Famous\", \"account\":{\"homePage\":\"http://www.example.com/fred\", \"name\":\"fred\"}, \"account\":{\"homePage\":\"http://www.example.com/ned\", \"name\":\"ned\"}\"}}, \"verb\":{\"id\":\"http://test.com/test\"}, \"object\":{\"id\":\"http://test.com/Iobject\"}}";
 
+            request(helper.getEndpoint())
+                .post(helper.getEndpointStatements())
+                .headers(helper.addAllHeaders({}))
+                .body(data)
+                .expect(400)
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
+                    } else {
+                        done();
+                    }
+                });
+        });
+/* Note this is a duplicate of two tests above */
         it('An Identified Group uses the "openid" property at most one time (Multiplicity, 4.1.a)', function (done) {
             // JSON parser validates this
             done();
