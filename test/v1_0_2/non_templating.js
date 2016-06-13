@@ -3042,7 +3042,7 @@
         var voidedId = helper.generateUUID();
         var voidingId = helper.generateUUID();
         var statementRefId = helper.generateUUID();
-        var voidingTime, untilVoidingTime;
+        var stmtTime;
 
         before('persist voided statement', function (done) {
             var voidedTemplates = [
@@ -3079,9 +3079,19 @@
                     if (err){
                         done(err);
                     } else {
-                        voidingTime = new Date().toISOString();
-                        untilVoidingTime = new Date(Date.now() + 300000).toISOString();
-                        done();
+                        var query = helper.getUrlEncoding({statementId: voidingId});
+                        request(helper.getEndpoint())
+                            .get(helper.getEndpointStatements() + '?' + query)
+                            .headers(helper.addAllHeaders({}))
+                            .expect(200).end(function (err, res) {
+                                if (err) {
+                                    done(err);
+                                } else {
+                                    var stmt = parse(res.body, done);
+                                    stmtTime = stmt.stored;
+                                    done();
+                                }
+                            })
                     }
                 });
         });
@@ -3105,9 +3115,10 @@
 
         it('should only return Object StatementRef when using "since"', function (done) {
             // Need to use statementRefId verb b/c initial voided statement comes before voidingTime
+            var sinceTime = new Date(Date.parse(stmtTime) - 1000).toISOString();
             var query = helper.getUrlEncoding({
                 verb: verb,
-                since: voidingTime
+                since: sinceTime
             });
             request(helper.getEndpoint())
                 .get(helper.getEndpointStatements() + '?' + query)
@@ -3128,7 +3139,7 @@
         it('should only return voiding statement when using "until"', function (done) {
             var query = helper.getUrlEncoding({
                 verb: "http://adlnet.gov/expapi/verbs/voided",
-                until: untilVoidingTime
+                until: stmtTime
             });
             request(helper.getEndpoint())
                 .get(helper.getEndpointStatements() + '?' + query)
@@ -3341,10 +3352,104 @@
             // JSON parser validates this
             done();
         });
-
-        it('A Voiding Statement\'s Target is defined as the Statement corresponding to the "object" property\'s "id" property\'s IRI (4.3.b)', function (done) {
+//And this it had to be changed to describe
+        describe('A Voiding Statement\'s Target is defined as the Statement corresponding to the "object" property\'s "id" property\'s IRI (4.3.b)', function (done) {
             // Handled by templating
-            done();
+            // done();
+
+/* This is added for testing 6/3/16 */
+
+var voidedId, voidingId;
+
+before('persist voided statement', function (done) {
+    var templates = [
+        {statement: '{{statements.default}}'}
+    ];
+    var data = createFromTemplate(templates);
+    data = data.statement;
+    request(helper.getEndpoint())
+    // request(helper.getEndpointAndAuth())
+        .post(helper.getEndpointStatements())
+        .headers(helper.addAllHeaders({}))
+        .json(data).expect(200).end(function (err, res) {
+            if (err) {
+                done(err);
+            } else {
+                voidedId = res.body[0];
+console.log("Before 1:\nvoidedId:", voidedId, "\nvoidingId:", voidingId);
+                done();
+            }
+        });
+});
+
+before('persist voiding statement', function (done) {
+    var templates = [
+        {statement: '{{statements.object_statementref}}'},
+        {verb: '{{verbs.voided}}'}
+    ];
+    var data = createFromTemplate(templates);
+    data = data.statement;
+    data.object.id = voidedId;
+    request(helper.getEndpoint())
+    // request(helper.getEndpointAndAuth())
+        .post(helper.getEndpointStatements())
+        .headers(helper.addAllHeaders({}))
+        .json(data).expect(200).end(function (err, res) {
+            if (err) {
+                done(err);
+            } else {
+                voidingId = res.body[0];
+console.log("Before 2:\nvoidedId:", voidedId, "\nvoidingId:", voidingId, "\nThe statement sent:", data, "\nThe whole results body:", res.body);
+                done();
+            }
+        });
+});
+
+it('retrieve voided statement and verify statement id', function (done) {
+    var query = helper.getUrlEncoding({voidedStatementId: voidedId});
+    // var query = helper.getUrlEncoding({voidedStatementId: voidingId}); //this line added for debugging
+    request(helper.getEndpoint())
+    // request(helper.getEndpointAndAuth())
+        .get(helper.getEndpointStatements() + '?' + query)
+        .headers(helper.addAllHeaders({}))
+        .expect(200).end(function (err, res) {
+            if (err) {
+                done(err);
+            } else {
+console.log("Part 1:\nvoidedId:", voidedId, "\nvoidingId:", voidingId);
+                var statement = parse(res.body, done);
+                expect(statement.id).to.equal(voidedId);
+                done();
+            }
+        });
+});
+
+it('retrieve voiding statement and verify statement id and object id', function (done) {
+console.log("One");
+    // var query = helper.getUrlEncoding({voidedStatementId: voidingId});
+    var query = helper.getUrlEncoding({voidedStatementId: voidedId}); //this line added for debugging
+console.log("Two");
+    request(helper.getEndpoint())
+    // request(helper.getEndpointAndAuth())
+        .get(helper.getEndpointStatements() + '?' + query)
+        .headers(helper.addAllHeaders({}))
+        .expect(200).end(function (err, res) {
+            if (err) {
+                done(err);
+            } else {
+console.log("Part 2:\nvoidedId:", voidedId, "\nvoidingId:", voidingId);
+                var statement = parse(res.body, done);
+                expect(statement.id).to.equal(voidingId);
+                expect(statement.object.id).to.equal(voidedId);
+                done();
+            }
+        });
+});
+
+
+/* This was added for testing 6/3/16 */
+
+
         });
 
         it('A "verb" property uses the "display" property at most one time (Multiplicity, 4.1.a)', function (done) {

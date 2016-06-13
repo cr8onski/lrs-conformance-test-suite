@@ -639,10 +639,13 @@
             return sendRequest('post', helper.getEndpointActivitiesState(), helper.buildState(), document, 204)
                 .then(function () {
                     return sendRequest('post', helper.getEndpointActivitiesState(), helper.buildState(), document, 204)
-                        .then(function () {
+                        .then(function (res) {
+// console.log(res);
                             var parameters = helper.buildState();
+// console.log("parameters with State id", parameters.stateId);
                             delete parameters.stateId;
-                            parameters.since = new Date(Date.now() - 1000).toISOString();
+                            parameters.since = new Date(Date.now() - 300000).toISOString();
+// console.log("Parameters", parameters, "\nDocument", document);
                             return sendRequest('get', helper.getEndpointActivitiesState(), parameters, undefined, 200)
                                 .then(function (res) {
                                     var body = res.body;
@@ -1015,7 +1018,8 @@
             return sendRequest('post', helper.getEndpointActivitiesProfile(), parameters, document, 204)
                 .then(function () {
                     delete parameters.profileId;
-                    parameters.since = new Date(Date.now() - 1000).toISOString(); // Date 1 second ago
+                    parameters.since = new Date(Date.now() - 300000).toISOString(); // Date 1 second ago
+// console.log("Parameters", parameters, "\nDocument", document);
                     return sendRequest('get', helper.getEndpointActivitiesProfile(), parameters, undefined, 200)
                         .then(function (res) {
                             var body = res.body;
@@ -1241,7 +1245,8 @@
                 document = helper.buildDocument();
             return sendRequest('post', helper.getEndpointAgentsProfile(), parameters, document, 204)
                 .then(function () {
-                    parameters.since = new Date(Date.now() - 1000).toISOString();
+                    parameters.since = new Date(Date.now() - 300000).toISOString();
+// console.log("Parameters", parameters, "\nDocument", document);
                     delete parameters.profileId;
                     return sendRequest('get', helper.getEndpointAgentsProfile(), parameters, undefined, 200)
                         .then(function (res) {
