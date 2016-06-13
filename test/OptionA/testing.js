@@ -5,7 +5,7 @@
 
     var expect = chai.expect;
 
-    describe('An LRS populates the "authority" property if it is not provided in the Statement, based on header information with the Agent corresponding to the user (contained within the header) (Implicit, 4.1.9.b, 4.1.9.c)', function () {
+    describe('Welcome to Option A.  An LRS populates the "authority" property if it is not provided in the Statement, based on header information with the Agent corresponding to the user (contained within the header) (Implicit, 4.1.9.b, 4.1.9.c)', function () {
         it('should populate authority', function (done) {
             var templates = [
                 {statement: '{{statements.default}}'}
@@ -97,76 +97,76 @@
     //     });
     // });
 
-    describe('An LRS returns a ContextActivity in an array, even if only a single ContextActivity is returned (4.1.6.2.c, 4.1.6.2.d)', function () {
-        var types = ['parent', 'grouping', 'category', 'other'];
-
-        types.forEach(function (type) {
-            it('should return array for statement context "' + type + '"  when single ContextActivity is passed', function (done) {
-                var templates = [
-                    {statement: '{{statements.context}}'},
-                    {context: '{{contexts.' + type + '}}'}
-                ];
-                var data = createFromTemplate(templates);
-                data = data.statement;
-                data.id = helper.generateUUID();
-
-                request(helper.getEndpoint())
-                    .post(helper.getEndpointStatements())
-                    .headers(helper.addAllHeaders({}))
-                    .json(data)
-                    .expect(200)
-                    .end()
-                    .get(helper.getEndpointStatements() + '?statementId=' + data.id)
-                    .headers(helper.addAllHeaders({}))
-                    .expect(200)
-                    .end(function (err, res) {
-                        if (err) {
-                            done(err);
-                        } else {
-                            var statement = parse(res.body, done);
-                            expect(statement).to.have.property('context').to.have.property('contextActivities');
-                            expect(statement.context.contextActivities).to.have.property(type);
-                            expect(statement.context.contextActivities[type]).to.be.an('array');
-                            done();
-                        }
-                    });
-            });
-        });
-
-        types.forEach(function (type) {
-            it('should return array for statement substatement context "' + type + '"  when single ContextActivity is passed', function (done) {
-                var templates = [
-                    {statement: '{{statements.object_substatement}}'},
-                    {object: '{{substatements.context}}'},
-                    {context: '{{contexts.' + type + '}}'}
-                ];
-                var data = createFromTemplate(templates);
-                data = data.statement;
-                data.id = helper.generateUUID();
-
-                request(helper.getEndpoint())
-                    .post(helper.getEndpointStatements())
-                    .headers(helper.addAllHeaders({}))
-                    .json(data)
-                    .expect(200)
-                    .end()
-                    .get(helper.getEndpointStatements() + '?statementId=' + data.id)
-                    .headers(helper.addAllHeaders({}))
-                    .expect(200)
-                    .end(function (err, res) {
-                        if (err) {
-                            done(err);
-                        } else {
-                            var statement = parse(res.body, done);
-                            expect(statement).to.have.property('object').to.have.property('context').to.have.property('contextActivities');
-                            expect(statement.object.context.contextActivities).to.have.property(type);
-                            expect(statement.object.context.contextActivities[type]).to.be.an('array');
-                            done();
-                        }
-                    });
-            });
-        });
-    });
+    // describe('An LRS returns a ContextActivity in an array, even if only a single ContextActivity is returned (4.1.6.2.c, 4.1.6.2.d)', function () {
+    //     var types = ['parent', 'grouping', 'category', 'other'];
+    //
+    //     types.forEach(function (type) {
+    //         it('should return array for statement context "' + type + '"  when single ContextActivity is passed', function (done) {
+    //             var templates = [
+    //                 {statement: '{{statements.context}}'},
+    //                 {context: '{{contexts.' + type + '}}'}
+    //             ];
+    //             var data = createFromTemplate(templates);
+    //             data = data.statement;
+    //             data.id = helper.generateUUID();
+    //
+    //             request(helper.getEndpoint())
+    //                 .post(helper.getEndpointStatements())
+    //                 .headers(helper.addAllHeaders({}))
+    //                 .json(data)
+    //                 .expect(200)
+    //                 .end()
+    //                 .get(helper.getEndpointStatements() + '?statementId=' + data.id)
+    //                 .headers(helper.addAllHeaders({}))
+    //                 .expect(200)
+    //                 .end(function (err, res) {
+    //                     if (err) {
+    //                         done(err);
+    //                     } else {
+    //                         var statement = parse(res.body, done);
+    //                         expect(statement).to.have.property('context').to.have.property('contextActivities');
+    //                         expect(statement.context.contextActivities).to.have.property(type);
+    //                         expect(statement.context.contextActivities[type]).to.be.an('array');
+    //                         done();
+    //                     }
+    //                 });
+    //         });
+    //     });
+    //
+    //     types.forEach(function (type) {
+    //         it('should return array for statement substatement context "' + type + '"  when single ContextActivity is passed', function (done) {
+    //             var templates = [
+    //                 {statement: '{{statements.object_substatement}}'},
+    //                 {object: '{{substatements.context}}'},
+    //                 {context: '{{contexts.' + type + '}}'}
+    //             ];
+    //             var data = createFromTemplate(templates);
+    //             data = data.statement;
+    //             data.id = helper.generateUUID();
+    //
+    //             request(helper.getEndpoint())
+    //                 .post(helper.getEndpointStatements())
+    //                 .headers(helper.addAllHeaders({}))
+    //                 .json(data)
+    //                 .expect(200)
+    //                 .end()
+    //                 .get(helper.getEndpointStatements() + '?statementId=' + data.id)
+    //                 .headers(helper.addAllHeaders({}))
+    //                 .expect(200)
+    //                 .end(function (err, res) {
+    //                     if (err) {
+    //                         done(err);
+    //                     } else {
+    //                         var statement = parse(res.body, done);
+    //                         expect(statement).to.have.property('object').to.have.property('context').to.have.property('contextActivities');
+    //                         expect(statement.object.context.contextActivities).to.have.property(type);
+    //                         expect(statement.object.context.contextActivities[type]).to.be.an('array');
+    //                         done();
+    //                     }
+    //                 });
+    //         });
+    //     });
+    // });
 
     describe('Will these three tests now show up??', function () {
 

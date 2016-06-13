@@ -5,7 +5,7 @@
 
     var expect = chai.expect;
 
-    describe('An LRS populates the "authority" property if it is not provided in the Statement, based on header information with the Agent corresponding to the user (contained within the header) (Implicit, 4.1.9.b, 4.1.9.c)', function () {
+    describe('Welcome to Option B.  An LRS populates the "authority" property if it is not provided in the Statement, based on header information with the Agent corresponding to the user (contained within the header) (Implicit, 4.1.9.b, 4.1.9.c)', function () {
         it('should populate authority', function (done) {
             var templates = [
                 {statement: '{{statements.default}}'}
@@ -168,23 +168,23 @@
         });
     });
 
-    describe('Will these three tests now show up??', function () {
-
-        it('An LRS\'s Statement API, upon processing a successful GET request, will return a single "statements" property (Multiplicity, Format, 4.2.table1.row1.c)', function (done) {
-            // JSON parser validates this
-            done();
-        });
-
-        it('A "more" property\'s referenced container object follows the same rules as the original GET request, originating with a single "statements" property and a single "more" property (4.2.table1.row1.b)', function (done) {
-            // JSON parser validates this
-            done();
-        });
-
-        it('An LRS\'s Statement API rejects with Error Code 400 Bad Request any DELETE request (7.2)', function (done) {
-            // Using requirement: An LRS rejects with error code 405 Method Not Allowed to any request to an API which uses a method not in this specification **Implicit ONLY in that HTML normally does this behavior**
-            done();
-        });
-    });
+    // describe('Will these three tests now show up??', function () {
+    //
+    //     it('An LRS\'s Statement API, upon processing a successful GET request, will return a single "statements" property (Multiplicity, Format, 4.2.table1.row1.c)', function (done) {
+    //         // JSON parser validates this
+    //         done();
+    //     });
+    //
+    //     it('A "more" property\'s referenced container object follows the same rules as the original GET request, originating with a single "statements" property and a single "more" property (4.2.table1.row1.b)', function (done) {
+    //         // JSON parser validates this
+    //         done();
+    //     });
+    //
+    //     it('An LRS\'s Statement API rejects with Error Code 400 Bad Request any DELETE request (7.2)', function (done) {
+    //         // Using requirement: An LRS rejects with error code 405 Method Not Allowed to any request to an API which uses a method not in this specification **Implicit ONLY in that HTML normally does this behavior**
+    //         done();
+    //     });
+    // });
 
 
     function createFromTemplate(templates) {

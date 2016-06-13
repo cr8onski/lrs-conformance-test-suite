@@ -5,34 +5,34 @@
 
     var expect = chai.expect;
 
-    describe('An LRS populates the "authority" property if it is not provided in the Statement, based on header information with the Agent corresponding to the user (contained within the header) (Implicit, 4.1.9.b, 4.1.9.c)', function () {
-        it('should populate authority', function (done) {
-            var templates = [
-                {statement: '{{statements.default}}'}
-            ];
-            var data = createFromTemplate(templates);
-            data = data.statement;
-            data.id = helper.generateUUID();
-
-            request(helper.getEndpoint())
-                .post(helper.getEndpointStatements())
-                .headers(helper.addAllHeaders({}))
-                .json(data)
-                .expect(200)
-                .end()
-                .get(helper.getEndpointStatements() + '?statementId=' + data.id)
-                .headers(helper.addAllHeaders({}))
-                .expect(200).end(function (err, res) {
-                    if (err) {
-                        done(err);
-                    } else {
-                        var statement = parse(res.body, done);
-                        expect(statement).to.have.property('authority');
-                        done();
-                    }
-                });
-        });
-    });
+    // describe('An LRS populates the "authority" property if it is not provided in the Statement, based on header information with the Agent corresponding to the user (contained within the header) (Implicit, 4.1.9.b, 4.1.9.c)', function () {
+    //     it('should populate authority', function (done) {
+    //         var templates = [
+    //             {statement: '{{statements.default}}'}
+    //         ];
+    //         var data = createFromTemplate(templates);
+    //         data = data.statement;
+    //         data.id = helper.generateUUID();
+    //
+    //         request(helper.getEndpoint())
+    //             .post(helper.getEndpointStatements())
+    //             .headers(helper.addAllHeaders({}))
+    //             .json(data)
+    //             .expect(200)
+    //             .end()
+    //             .get(helper.getEndpointStatements() + '?statementId=' + data.id)
+    //             .headers(helper.addAllHeaders({}))
+    //             .expect(200).end(function (err, res) {
+    //                 if (err) {
+    //                     done(err);
+    //                 } else {
+    //                     var statement = parse(res.body, done);
+    //                     expect(statement).to.have.property('authority');
+    //                     done();
+    //                 }
+    //             });
+    //     });
+    // });
 
     // describe('A Voiding Statement cannot Target another Voiding Statement (4.3)', function () {
     //     var voidedId;
@@ -97,7 +97,7 @@
     //     });
     // });
 
-    describe('An LRS returns a ContextActivity in an array, even if only a single ContextActivity is returned (4.1.6.2.c, 4.1.6.2.d)', function () {
+    describe('Welcome to Option C.  An LRS returns a ContextActivity in an array, even if only a single ContextActivity is returned (4.1.6.2.c, 4.1.6.2.d)', function () {
         var types = ['parent', 'grouping', 'category', 'other'];
 
         types.forEach(function (type) {
