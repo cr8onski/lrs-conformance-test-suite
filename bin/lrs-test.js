@@ -6,8 +6,12 @@
 (function (process, require, program, exit, packageJson, Q, Joi, fs, path, Mocha) {
     'use strict';
 
-    var DIRECTORY = ['v1_0_2'];
+    var DIRECTORY = ['v1_0_2', 'v1_0_3', 'OptionA', 'OptionB', 'OptionC', 'OptionD'];
+DIRECTORY.forEach(function(dir) {
 
+console.log(dir);
+});
+console.log(DIRECTORY[0], typeof DIRECTORY[1]);
     program
         .version(packageJson.version)
         .usage('[options]')
@@ -23,7 +27,8 @@
 
     var deferred = Q.defer(),
         optionsValidator = Joi.object({
-            directory: Joi.string(),
+            // directory: Joi.string(), the original
+            directory: Joi.array().items(Joi.string().required()),
             /* See [RFC-3986](http://tools.ietf.org/html/rfc3986#page-17) */
             endpoint: Joi.string().regex(/^[a-zA-Z][a-zA-Z0-9+\.-]*:.+/, 'URI').required(),
             basicAuth: Joi.any(true, false),
@@ -44,7 +49,6 @@
                 grep: program.grep
             },
             validOptions = Joi.validate(options, optionsValidator);
-
         if (validOptions.error) {
             deferred.reject(validOptions.error);
         } else {
@@ -60,13 +64,16 @@
             process.env.BASIC_AUTH_ENABLED = options.basicAuth;
             process.env.BASIC_AUTH_USER = options.authUser;
             process.env.BASIC_AUTH_PASSWORD = options.authPass;
-            var testDirectory = 'test/' + options.directory;
-            fs.readdirSync(testDirectory).filter(function (file) {
-                return file.substr(-3) === '.js';
-            }).forEach(function (file) {
-                mocha.addFile(
-                    path.join(testDirectory, file)
-                );
+console.log(options, typeof options.directory);
+            options.directory.forEach(function(dir) {
+                var testDirectory = 'test/' + dir;
+                fs.readdirSync(testDirectory).filter(function (file) {
+                    return file.substr(-3) === '.js';
+                }).forEach(function (file) {
+                    mocha.addFile(
+                        path.join(testDirectory, file)
+                    );
+                });
             });
             mocha.run(function (failures) {
                 if (failures) {
