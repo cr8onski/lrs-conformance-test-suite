@@ -6,7 +6,7 @@
 (function (process, require, program, exit, packageJson, Q, Joi, fs, path, Mocha) {
     'use strict';
 
-    var DIRECTORY = 'v1_0_2';
+    var DIRECTORY = ['v1_0_2'];
 
     program
         .version(packageJson.version)
