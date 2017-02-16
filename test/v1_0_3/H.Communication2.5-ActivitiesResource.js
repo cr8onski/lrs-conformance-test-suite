@@ -67,7 +67,7 @@ describe('Activities Resource Requirements (Communication 2.5)', () => {
         var data = helper.createFromTemplate(templates);
         var statement = data.statement;
         statement.object.id = 'http://www.example.com/verify/complete/' + helper.generateUUID();
-console.log(statement.object.id);
+
         return helper.sendRequest('post', helper.getEndpointStatements(), undefined, [statement], 200)
         .then(function () {
             var parameters = {
