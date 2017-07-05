@@ -2660,7 +2660,7 @@ MUST have a "Content-Type" header
         var stmtTime, prevStmtTime;
 
         before('persist voided statement', function (done) {
-            // console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' Ed Before');
+            console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' Ed Before');
             sinceVoidingTime = new Date(Date.now() - helper.getTimeMargin() - 4000).toISOString();
             var voidedTemplates = [
                 {statement: '{{statements.default}}'}
@@ -2678,7 +2678,7 @@ MUST have a "Content-Type" header
         });
 
         before('persist voiding statement', function (done) {
-            // console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' Ing Before');
+            console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' Ing Before');
             var voidingTemplates = [
                 {statement: '{{statements.voiding}}'}
             ];
@@ -2697,7 +2697,7 @@ MUST have a "Content-Type" header
         });
 
         before('persist object with statement references', function (done) {
-            // console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' Ref Before');
+            console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' Ref Before');
             var statementRefTemplates = [
                 {statement: '{{statements.object_statementref}}'}
             ];
@@ -2717,7 +2717,7 @@ MUST have a "Content-Type" header
         });
 
         before('ensure all stmts are recorded in the lrs', function (done) {
-            // console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' Final Before');
+            console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' Final Before');
             request(helper.getEndpointAndAuth())
             .get(helper.getEndpointStatements())
             .wait(helper.genDelay(stmtTime, '?statementId='+statementRefId, statementRefId))
@@ -2727,7 +2727,16 @@ MUST have a "Content-Type" header
                 if (err) {
                     done(err);
                 } else {
+                    var body = helper.parse(res.body);
+                    console.log(Object.keys(body));
+                    var stmtsb4 = body.statements;
+                    stmtsb4.forEach((b4stmt) => {
+                        if (b4stmt.id === statementRefId) {
+                            console.log(`${b4stmt.stored} Stored\n${b4stmt.timestamp} Timestamp ${statementRefId}`);
+                        }
+                    })
                     untilVoidingTime = new Date(Date.now() - helper.getTimeMargin() + 4000).toISOString();
+                    console.log(`${untilVoidingTime} Until Voiding Time.\n${new Date(Date.now() - helper.getTimeMargin()).toISOString()} Before 4 done.`);
                     done();
                 }
             });
@@ -2736,7 +2745,7 @@ MUST have a "Content-Type" header
         // reworded the test to be more generic, shouldn't have to stay in here
         it('should only return statements stored after designated "since" timestamp when using "since" parameter', function (done) {
             // Need to use statementRefId verb b/c initial voided statement comes before voidingTime
-            // console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' Since');
+            console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' Since');
             var query = helper.getUrlEncoding({
                 verb: verb,
                 since: sinceVoidingTime
@@ -2768,6 +2777,7 @@ MUST have a "Content-Type" header
 
         // reworded the test to be more generic, shouldn't have to stay in here
         it('should only return statements stored at or before designated "before" timestamp when using "until" parameter', function (done) {
+            console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' Until');
             var query = helper.getUrlEncoding({
                 verb: verb,
                 until: untilVoidingTime
@@ -2804,7 +2814,7 @@ MUST have a "Content-Type" header
 
         // reworded the test to be more generic, shouldn't have to stay in here
         it('should return the number of statements listed in "limit" parameter', function (done) {
-            // console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' Limit');
+            console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' Limit');
             var query = helper.getUrlEncoding({
                 verb: verb,
                 limit: 1
@@ -2829,7 +2839,7 @@ MUST have a "Content-Type" header
 
         // i think this can be removed
         it('should return StatementRef and voiding statement when not using "since", "until", "limit"', function (done) {
-            // console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' None');
+            console.log(new Date(Date.now() - helper.getTimeMargin()).toISOString() + ' None');
             var query = helper.getUrlEncoding({
                 verb: verb
             });
