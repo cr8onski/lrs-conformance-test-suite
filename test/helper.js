@@ -232,6 +232,7 @@ if (!process.env.EB_NODE_COMMAND) {
                 if (query) {
                     endP += query;
                 }
+console.log(endP);
                 var delta, finish;
 
                 function doRequest()
@@ -252,11 +253,15 @@ if (!process.env.EB_NODE_COMMAND) {
                             try {
                             //we parse the result into either a single statement or a statements object
                                 result = JSON.parse(res.body);
+console.log('we have parsed: ', result);
                             } catch (e) {
                                 result = {};
+console.log('parsing failed: ', result);
                             }
+console.log(id, '  kyle o i o s\n', result.id);
                             if (id && result.id && (result.id === id)) {
                             //if we find a single statement and the id we are looking for, then we're good we can continue with the testing
+console.log(id, '\n', result.id);
                                 p.resolve();
                             } else if (id && result.statements && stmtFound(result.statements, id)) {
                             //if we find a block of statements and the id we are looking for, then we're good and we can continue with the testing
@@ -297,7 +302,7 @@ if (!process.env.EB_NODE_COMMAND) {
                         found = true;
                     }
                 });
-                //if (!found) console.log(id, 'Not found - please continue');
+                if (!found) console.log(id, 'Not found - please continue');
                 return found;
             }
         },

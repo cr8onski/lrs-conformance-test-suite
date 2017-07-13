@@ -1404,7 +1404,8 @@ StatementResult Object.
             var query = helper.getUrlEncoding({attachments: true, statementId: stmtId});
             request(helper.getEndpointAndAuth())
             .get(helper.getEndpointStatements() + '?' + query)
-            .wait(helper.genDelay(stmtTime, '?statementId=' + stmtId, stmtId))
+            .wait(helper.genDelay(stmtTime, '?statementId=' + stmtId + '&attachments=true', stmtId))
+            // .wait(helper.genDelay(stmtTime, '?statementId=' + stmtId, stmtId))
             .headers(helper.addAllHeaders({}))
             .expect(200, function (err, res) {
                 if (err) {
