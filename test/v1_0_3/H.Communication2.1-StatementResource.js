@@ -1321,6 +1321,7 @@ StatementResult Object.
  */
     describe('An LRS\'s Statement Resource can process a GET request with "attachments" as a parameter  (**Implicit**, Communication 2.1.3.s1.table1.row13, XAPI-00167)', function () {
 
+        this.timeout(0);
         var stmtTime, stmtId;
 
         before('set up statement with two attachments for test', function (done) {
@@ -1401,45 +1402,73 @@ StatementResult Object.
         });
 
         it('should process using GET with "attachments"', function (done) {
+            // this.timeout(0);
             var query = helper.getUrlEncoding({attachments: true, statementId: stmtId});
-            request(helper.getEndpointAndAuth())
-            .get(helper.getEndpointStatements() + '?' + query)
-            .wait(helper.genDelay(stmtTime, '?statementId=' + stmtId + '&attachments=true', stmtId))
-            // .wait(helper.genDelay(stmtTime, '?statementId=' + stmtId, stmtId))
-            .headers(helper.addAllHeaders({}))
-            .expect(200, function (err, res) {
-                if (err) {
-                    done(err);
-                } else {
-                    expect(res.headers['content-type']).to.include('multipart/mixed');
-                    // Find the boundary
-                    var b = res.headers['content-type'].split(';');
-                    var boundary;
-                    var quotes = b[1].match(/"/g);
-                    if (quotes) {
-                        boundary = b[1].trim().match(/"([^"]+)"/)[1];
+            let count = 0;
+            function fromTheTop() {
+                console.log(++count);
+                request(helper.getEndpointAndAuth())
+                .get(helper.getEndpointStatements() + '?' + query)
+                .wait(helper.genDelay(stmtTime, '?statementId=' + stmtId + '&attachments=true', stmtId))
+                // .wait(helper.genDelay(stmtTime, '?statementId=' + stmtId, stmtId))
+                .headers(helper.addAllHeaders({}))
+                // .expect(200, function (err, res) {
+                .end(function (err, res) {
+                    if (err) {
+                        done(err);
                     } else {
-                        var temp = b[1].trim();
-                        boundary = temp.substring(temp.indexOf('=') + 1);
+                        console.log();
+                        console.log(res.statusCode, res.headers['x-experience-api-consistent-through'], new Date(stmtTime).toISOString());
+                        res.statusCode = 404;
+                        // res.headers['x-experience-api-consistent-through'] = new Date(stmtTime - 500000).toISOString();
+                        console.log(res.statusCode, res.headers['x-experience-api-consistent-through'], new Date(stmtTime).toISOString());
+                        console.log(res.statusCode === 404 && new Date(res.headers['x-experience-api-consistent-through']).valueOf() < stmtTime);
+                        console.log(res.headers['x-experience-api-consistent-through'], new Date(res.headers['x-experience-api-consistent-through']).valueOf());
+                        if (res.statusCode === 200) {
+                            expect(res.headers['content-type']).to.include('multipart/mixed');
+                            // Find the boundary
+                            var b = res.headers['content-type'].split(';');
+                            var boundary;
+                            var quotes = b[1].match(/"/g);
+                            if (quotes) {
+                                boundary = b[1].trim().match(/"([^"]+)"/)[1];
+                            } else {
+                                var temp = b[1].trim();
+                                boundary = temp.substring(temp.indexOf('=') + 1);
+                            }
+                            // Verify we have the statement we asked for
+                            // Use boundary to get the first part of response, excluding "--"
+                            var x = res.body.split(boundary);
+                            var c = x[1].substring(x[1].indexOf('{'), x[1].lastIndexOf('}') + 1);
+                            var result = helper.parse(c, done);
+                            expect(result).to.have.property('id');
+                            expect(result.id).to.equal(stmtId);
+                            // Create an array of global matches of the pattern, the length of which is equal to the number of times that pattern appears in the given string
+                            var regex1 = new RegExp(t1attHash, 'g');
+                            var regex2 = new RegExp(t2attHash, 'g');
+                            var match1 = (res.body.match(regex1) || []).length;
+                            var match2 = (res.body.match(regex2) || []).length;
+                            // Comnpare that number to 2 the number of times it is expected for a given has to appear in the response, once in the attachments property, and once along with the attachment
+                            expect(match1).to.eql(2);
+                            expect(match2).to.eql(2);
+                            done();
+                        } else if (res.statusCode === 404 && new Date(res.headers['x-experience-api-consistent-through']) < stmtTime) {
+                            console.log('before 404 retry');
+                            function retrial () {
+                                helper.genDelay(stmtTime, '?' + query, stmtId);
+                                fromTheTop();
+                            } retrial();
+                            console.log('after 404 retry');
+
+                        } else {
+                            console.log('not 200 nor 404');
+                            // expect(200, done);
+                            const err = new Error('Received neither 200, nor 404 with upcoming consistent through time.')
+                            done(err);
+                        }
                     }
-                    // Verify we have the statement we asked for
-                    // Use boundary to get the first part of response, excluding "--"
-                    var x = res.body.split(boundary);
-                    var c = x[1].substring(x[1].indexOf('{'), x[1].lastIndexOf('}') + 1);
-                    var result = helper.parse(c, done);
-                    expect(result).to.have.property('id');
-                    expect(result.id).to.equal(stmtId);
-                    // Create an array of global matches of the pattern, the length of which is equal to the number of times that pattern appears in the given string
-                    var regex1 = new RegExp(t1attHash, 'g');
-                    var regex2 = new RegExp(t2attHash, 'g');
-                    var match1 = (res.body.match(regex1) || []).length;
-                    var match2 = (res.body.match(regex2) || []).length;
-                    // Comnpare that number to 2 the number of times it is expected for a given has to appear in the response, once in the attachments property, and once along with the attachment
-                    expect(match1).to.eql(2);
-                    expect(match2).to.eql(2);
-                    done();
-                }
-            });
+                });
+            } fromTheTop();
         });
     });
 
